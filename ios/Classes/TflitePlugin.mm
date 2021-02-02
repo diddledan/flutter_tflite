@@ -167,11 +167,8 @@ NSString* loadModel(NSObject<FlutterPluginRegistrar>* _registrar, NSDictionary* 
   if (useCoreMLDelegate) {
     TfLiteCoreMlDelegateOptions options = {};
     delegate = TfLiteCoreMlDelegateCreate(&options);
-    if (delegate == NULL && useGpuDelegate) {
-      goto GPUDELEGATE;
-    }
-  } else if (useGpuDelegate) {
-GPUDELEGATE:
+  }
+  if (delegate == NULL && useGpuDelegate) {
     delegate = TFLGpuDelegateCreate(nullptr);
     TfLiteInterpreterOptionsAddDelegate(options, delegate);
   }
