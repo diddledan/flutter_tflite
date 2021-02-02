@@ -19,6 +19,7 @@
 #elif defined TFLITE2
 #import "TensorFlowLiteC.h"
 #import "metal_delegate.h"
+#import "coreml_delegate.h"
 #else
 #include "tensorflow/lite/kernels/register.h"
 #include "tensorflow/lite/model.h"
@@ -162,7 +163,15 @@ NSString* loadModel(NSObject<FlutterPluginRegistrar>* _registrar, NSDictionary* 
   TfLiteInterpreterOptionsSetNumThreads(options, num_threads);
   
   bool useGpuDelegate = [args[@"useGpuDelegate"] boolValue];
-  if (useGpuDelegate) {
+  bool useCoreMLDelegate = [args[@"useCoreMLDelegate"] boolValue];
+  if (useCoreMLDelegate) {
+    TfLiteCoreMlDelegateOptions options = {};
+    delegate = TfLiteCoreMlDelegateCreate(&options);
+    if (delegate == NULL && useGpuDelegate) {
+      goto GPUDELEGATE;
+    }
+  } else if (useGpuDelegate) {
+GPUDELEGATE:
     delegate = TFLGpuDelegateCreate(nullptr);
     TfLiteInterpreterOptionsAddDelegate(options, delegate);
   }
